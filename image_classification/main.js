@@ -5,6 +5,7 @@ import {EfficientNetFP16Nchw} from './efficientnet_fp16_nchw.js';
 import {MobileNetV2Nchw} from './mobilenet_nchw.js';
 import {MobileNetV2Nhwc} from './mobilenet_nhwc.js';
 import {MobileNetV2Uint8Nhwc} from './mobilenet_uint8_nhwc.js';
+import {ResNet18Onnx} from './resnet18_onnx.js';
 import {SqueezeNetNchw} from './squeezenet_nchw.js';
 import {SqueezeNetNhwc} from './squeezenet_nhwc.js';
 import {ResNet50V2Nchw} from './resnet50v2_nchw.js';
@@ -37,6 +38,7 @@ const disabledSelectors = ['#tabs > li', '.btn'];
 const modelIds = [
   'efficientnet',
   'mobilenet',
+  'resnet18',
   'resnet50v1',
   'resnet50v2',
   'squeezenet',
@@ -60,6 +62,7 @@ const modelList = {
   'nchw': {
     'float32': [
       'mobilenet',
+      'resnet18',
       'squeezenet',
       'resnet50v2',
     ],
@@ -93,12 +96,9 @@ $('#deviceTypeBtns .btn').on('change', async (e) => {
   const showUint8 = layout === 'nhwc' ? true : false;
   ui.handleBtnUI('#uint8Label', !showUint8);
   ui.handleBtnUI('#float16Label', false);
-  // Only show the supported models for each deviceType.
-  if (deviceType == 'npu') {
-    ui.handleBtnUI('#float32Label', true);
-    $('#float16').click();
-  } else {
-    ui.handleBtnUI('#float32Label', false);
+  // Allow both float32 and float16 for all backends (e.g. NPU with float32 for ResNet-18).
+  ui.handleBtnUI('#float32Label', false);
+  if (deviceType != 'npu') {
     $('#float32').click();
   }
 
@@ -291,6 +291,11 @@ function constructNetObject(modelName, layout, dataType) {
       } else if (dataType != 'uint8') {
         return layout == 'nhwc' ?
             new MobileNetV2Nhwc(dataType) : new MobileNetV2Nchw(dataType);
+      }
+      break;
+    case 'resnet18':
+      if (layout == 'nchw' && dataType == 'float32') {
+        return new ResNet18Onnx();
       }
       break;
     case 'resnet50v1':
