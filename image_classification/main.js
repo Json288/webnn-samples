@@ -6,6 +6,7 @@ import {MobileNetV2Nchw} from './mobilenet_nchw.js';
 import {MobileNetV2Nhwc} from './mobilenet_nhwc.js';
 import {MobileNetV2Uint8Nhwc} from './mobilenet_uint8_nhwc.js';
 import {ResNet18Onnx} from './resnet18_onnx.js';
+import {ResNet50Onnx} from './resnet50_onnx.js';
 import {SqueezeNetNchw} from './squeezenet_nchw.js';
 import {SqueezeNetNhwc} from './squeezenet_nhwc.js';
 import {ResNet50V2Nchw} from './resnet50v2_nchw.js';
@@ -43,30 +44,40 @@ const modelIds = [
   'resnet50v2',
   'squeezenet',
 ];
+// Model lists per device: NPU + Float32 shows only ONNX models; others never show ResNet-18 ONNX.
 const modelList = {
-  'nhwc': {
-    'float32': [
-      'mobilenet',
-      'squeezenet',
-      'resnet50v2',
-    ],
-    'float16': [
-      'mobilenet',
-      'squeezenet',
-      'resnet50v2',
-    ],
-    'uint8': [
-      'mobilenet',
-    ],
+  'cpu': {
+    'nhwc': {
+      'float32': ['mobilenet', 'squeezenet', 'resnet50v2'],
+      'float16': ['mobilenet', 'squeezenet', 'resnet50v2'],
+      'uint8': ['mobilenet'],
+    },
+    'nchw': {
+      'float32': ['mobilenet', 'squeezenet', 'resnet50v2'],
+      'float16': ['efficientnet', 'mobilenet', 'resnet50v1', 'resnet50v2', 'squeezenet'],
+    },
   },
-  'nchw': {
-    'float32': [
-      'mobilenet',
-      'resnet18',
-      'squeezenet',
-      'resnet50v2',
-    ],
-    'float16': modelIds,
+  'gpu': {
+    'nhwc': {
+      'float32': ['mobilenet', 'squeezenet', 'resnet50v2'],
+      'float16': ['mobilenet', 'squeezenet', 'resnet50v2'],
+      'uint8': ['mobilenet'],
+    },
+    'nchw': {
+      'float32': ['mobilenet', 'squeezenet', 'resnet50v2'],
+      'float16': ['efficientnet', 'mobilenet', 'resnet50v1', 'resnet50v2', 'squeezenet'],
+    },
+  },
+  'npu': {
+    'nhwc': {
+      'float32': ['mobilenet', 'squeezenet', 'resnet50v2'],
+      'float16': ['mobilenet', 'squeezenet', 'resnet50v2'],
+      'uint8': ['mobilenet'],
+    },
+    'nchw': {
+      'float32': ['resnet18', 'resnet50v2'],
+      'float16': ['efficientnet', 'mobilenet', 'resnet50v1', 'resnet50v2', 'squeezenet'],
+    },
   },
 };
 
@@ -102,7 +113,8 @@ $('#deviceTypeBtns .btn').on('change', async (e) => {
     $('#float32').click();
   }
 
-  utils.displayAvailableModels(modelList, modelIds, layout, dataType);
+  utils.displayAvailableModels(modelList, modelIds, layout, dataType, deviceType);
+  updateResNet50V2Label(deviceType, dataType);
   // Uncheck selected model
   if (modelName != '') {
     $(`#${modelName}`).parent().removeClass('active');
@@ -132,13 +144,19 @@ $('#dataTypeBtns .btn').on('change', async (e) => {
   }
 
   dataType = $(e.target).attr('id');
-  utils.displayAvailableModels(modelList, modelIds, layout, dataType);
+  utils.displayAvailableModels(modelList, modelIds, layout, dataType, deviceType);
+  updateResNet50V2Label(deviceType, dataType);
   // Uncheck selected model
   if (modelName != '') {
     $(`#${modelName}`).parent().removeClass('active');
   }
 });
 
+function updateResNet50V2Label(deviceType, dataType) {
+  const label = (deviceType === 'npu' && dataType === 'float32') ?
+    'ResNet 50 ONNX' : 'ResNet 50 V2';
+  $('#resnet50v2Label').text(label);
+}
 
 // Click trigger to do inference with <img> element
 $('#img').click(async () => {
@@ -305,6 +323,9 @@ function constructNetObject(modelName, layout, dataType) {
       break;
     case 'resnet50v2':
       if (dataType != 'uint8') {
+        if (layout == 'nchw' && dataType == 'float32') {
+          return new ResNet50Onnx();
+        }
         return layout == 'nhwc' ?
             new ResNet50V2Nhwc(dataType) : new ResNet50V2Nchw(dataType);
       }

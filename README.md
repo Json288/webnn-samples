@@ -1,6 +1,8 @@
 [![lint](https://github.com/webmachinelearning/webnn-samples/workflows/lint/badge.svg)](https://github.com/webmachinelearning/webnn-samples/actions)
 [![deploy](https://github.com/webmachinelearning/webnn-samples/workflows/deploy/badge.svg)](https://github.com/webmachinelearning/webnn-samples/actions)
 
+> **Fork** — This repository is a fork of [webmachinelearning/webnn-samples](https://github.com/webmachinelearning/webnn-samples) with additional changes (e.g. ResNet-18 ONNX sample). For the canonical upstream project, see the [original repository](https://github.com/webmachinelearning/webnn-samples).
+
 # WebNN API Samples
 This repository contains a collection of samples and examples demonstrating Web Neural Network API (WebNN) usage in web applications. Web Neural Network API (WebNN) is a JavaScript API that provides a high-level interface for performing machine learning computations on neural networks in web applications. With WebNN, developers can leverage hardware acceleration to efficiently run inference tasks on various devices, including CPUs, GPUs, and dedicated AI accelerators. It simplifies the integration of machine learning models into web apps, opening up new possibilities for interactive experiences and intelligent applications right in the browser.
 
@@ -23,36 +25,26 @@ This repository hosts a wide range of samples and examples that showcase differe
 ## Requirements
 You will require a compatible browser that supports Web Neural Network API (WebNN) to run the samples in this repository. Currently, Chrome and Edge browsers provide support for WebNN.
 
+## Prerequisites: Node.js and npm
+You need **Node.js** (which includes **npm**) to install dependencies and run the dev server.
+
+- **Install Node.js** (LTS recommended): [https://nodejs.org/](https://nodejs.org/) — download the installer for your OS; npm is included.
+- **Verify** after installation:
+  ```bash
+  node -v
+  npm -v
+  ```
+- Alternatively, on Linux/macOS you can use a version manager (e.g. [nvm](https://github.com/nvm-sh/nvm)) or your package manager (`apt`, `brew`, etc.).
+
 ## Getting Started
 To get started, follow these steps:    
 1. Clone the repository to your local machine and navigate to it:
  ```bash
-> git clone --recurse-submodules https://github.com/webmachinelearning/webnn-samples
+> git clone --recurse-submodules https://github.com/Json288/webnn-samples.git
 > cd webnn-samples
 > npm install
 > npm run start
 ```
-2. Navigate to the desired sample directory that you want to explore.
-3. Read the accompanying README.md file for the sample to understand its purpose, requirements, and implementation details.
-4. Follow the instructions provided in the README to set up the necessary dependencies and run the sample.
-5. Keep in mind that WebNN currently supports the CPU backend only on Chrome or Edge browsers, and it requires enabling the experimental web platform features flag (see below). Ensure you have this flag enabled in your browser to fully experience WebNN functionality.
-6. Experiment with the code and explore how WebNN can enhance machine learning tasks in the browser, navigating to http://localhost:8080.
-
-### Deploy To Your Github Pages
-
-WebNN Samples is currently hosted on GitHub Pages, with model files stored on Amazon S3 and distributed via CloudFront. If you host WebNN Samples on your own GitHub Pages, you may encounter a 'failed to fetch' error due to CORS policy restrictions. To resolve this issue, please update the [weightsOrigin() configuration](https://github.com/webmachinelearning/webnn-samples/blob/master/common/utils.js#L6) as described in the [issue 285](https://github.com/webmachinelearning/webnn-samples/issues/285#issuecomment-2408988830).
-
-### WebNN Installation Guides
-
-Please visit [WebNN Installation Guides](https://webnn.io/en/learn/get-started/installation) to get started with WebNN on Intel AI PCs.
-
-## Support and Feedback
-If you encounter any issues or have feedback on the WebNN Samples, please open an issue on the repository. We appreciate your input and will strive to address any problems as quickly as possible.
-
-You can also join our [community forum](https://webmachinelearning.github.io/) for general questions and discussions about WebNN.
-
-## Contributing
-We welcome contributions from the community to make webnn-samples even better! If you have an idea for a new sample, an improvement to an existing one, or any other enhancement, please feel free to submit a pull request.
 
 ## Resources
 ### WebNN Resources
@@ -72,11 +64,4 @@ To learn more about Web Neural Network API (WebNN) and its capabilities, check o
 * [Facial Landmark Detection](https://webmachinelearning.github.io/webnn-samples/facial_landmark_detection/)
 * [Image classification](https://webmachinelearning.github.io/webnn-samples/image_classification/)
 * [Object detection](https://webmachinelearning.github.io/webnn-samples/object_detection/)
-
-## Acknowledgements
-We thank the entire WebNN community for their valuable contributions and feedback. Your support and enthusiasm have been instrumental in making WebNN a robust and accessible tool for machine learning in the web ecosystem.
-
-We also want to thank the developers and researchers behind the underlying technologies that power WebNN, including the Web Neural Network API and related frameworks. Their efforts have paved the way for seamless machine-learning experiences in web browsers.
-
-We appreciate your interest in WebNN Samples! We hope you find these examples inspiring and educational. Happy coding with Web Neural Networks!
 
