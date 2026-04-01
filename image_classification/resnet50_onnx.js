@@ -2,15 +2,21 @@
 
 import * as ort from 'onnxruntime-web';
 
+/** Hugging Face Hub direct file URL (use /resolve/, not /blob/). */
+const RESNET50_ONNX_URL =
+    'https://huggingface.co/amd/resnet50/resolve/main/ResNet50_fp32.onnx';
+
 /**
- * ResNet-50 image classification via ONNX model (resnet50.onnx).
+ * ResNet-50 image classification via ONNX (AMD model on Hugging Face).
+ * https://huggingface.co/amd/resnet50
  * Uses ONNX Runtime Web with WebNN execution provider.
- * Replaces the native WebNN ResNet50 V2 path for NPU + Float32.
- * Place your resnet50.onnx in image_classification/models/resnet50.onnx.
+ * Selected in the UI as "ResNet50" (model id `resnet50_onnx`).
  */
 export class ResNet50Onnx {
   constructor() {
     this.session_ = null;
+    this.modelBuffer_ = null;
+    this.deviceType_ = 'cpu';
     this.inputName_ = null;
     this.outputName_ = null;
     this.inputOptions = {
@@ -25,11 +31,24 @@ export class ResNet50Onnx {
   }
 
   async load(contextOptions) {
-    const deviceType = contextOptions?.deviceType || 'cpu';
-    const modelUrl = './models/resnet50.onnx';
-    this.session_ = await ort.InferenceSession.create(modelUrl, {
-      executionProviders: [{name: 'webnn', deviceType}],
+    this.deviceType_ = contextOptions?.deviceType || 'cpu';
+    const response = await fetch(RESNET50_ONNX_URL);
+    if (!response.ok) {
+      throw new Error(
+          `ResNet50 ONNX: failed to fetch model (${response.status})`);
+    }
+    this.modelBuffer_ = await response.arrayBuffer();
+    return null;
+  }
+
+  async build(_outputOperand) {
+    if (!this.modelBuffer_) {
+      throw new Error('ResNet50 ONNX: load() must run before build()');
+    }
+    this.session_ = await ort.InferenceSession.create(this.modelBuffer_, {
+      executionProviders: [{name: 'webnn', deviceType: this.deviceType_}],
     });
+    this.modelBuffer_ = null;
     const inputs = this.session_.inputNames;
     const outputs = this.session_.outputNames;
     if (!inputs.length || !outputs.length) {
@@ -37,11 +56,6 @@ export class ResNet50Onnx {
     }
     this.inputName_ = inputs[0];
     this.outputName_ = outputs[0];
-    return this.outputName_;
-  }
-
-  async build(_outputOperand) {
-    // No separate build step for ONNX Runtime.
   }
 
   async compute(inputBuffer) {
