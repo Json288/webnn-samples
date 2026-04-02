@@ -1,11 +1,11 @@
 'use strict';
 
 import {ResNet50V1FP16Nchw} from './resnet50v1_fp16_nchw.js';
+import {ResNet50V1Fp32Nchw} from './resnet50v1_fp32_nchw.js';
 import {EfficientNetFP16Nchw} from './efficientnet_fp16_nchw.js';
 import {MobileNetV2Nchw} from './mobilenet_nchw.js';
 import {MobileNetV2Nhwc} from './mobilenet_nhwc.js';
 import {MobileNetV2Uint8Nhwc} from './mobilenet_uint8_nhwc.js';
-import {ResNet50Onnx} from './resnet50_onnx.js';
 import {SqueezeNetNchw} from './squeezenet_nchw.js';
 import {SqueezeNetNhwc} from './squeezenet_nhwc.js';
 import {ResNet50V2Nchw} from './resnet50v2_nchw.js';
@@ -38,12 +38,11 @@ const disabledSelectors = ['#tabs > li', '.btn'];
 const modelIds = [
   'efficientnet',
   'mobilenet',
-  'resnet50_onnx',
   'resnet50v1',
   'resnet50v2',
   'squeezenet',
 ];
-// Model lists per device: NPU + Float32 includes ONNX ResNet50 and native models as listed.
+// Model lists per device.
 const modelList = {
   'cpu': {
     'nhwc': {
@@ -74,7 +73,7 @@ const modelList = {
       'uint8': ['mobilenet'],
     },
     'nchw': {
-      'float32': ['resnet50_onnx', 'mobilenet', 'squeezenet'],
+      'float32': ['resnet50v1', 'mobilenet', 'squeezenet'],
       'float16': ['efficientnet', 'mobilenet', 'resnet50v1', 'resnet50v2', 'squeezenet'],
     },
   },
@@ -106,7 +105,7 @@ $('#deviceTypeBtns .btn').on('change', async (e) => {
   const showUint8 = layout === 'nhwc' ? true : false;
   ui.handleBtnUI('#uint8Label', !showUint8);
   ui.handleBtnUI('#float16Label', false);
-  // Allow both float32 and float16 for all backends (e.g. NPU with float32 for ONNX ResNet50).
+  // Allow both float32 and float16 for all backends.
   ui.handleBtnUI('#float32Label', false);
   if (deviceType != 'npu') {
     $('#float32').click();
@@ -302,14 +301,12 @@ function constructNetObject(modelName, layout, dataType) {
             new MobileNetV2Nhwc(dataType) : new MobileNetV2Nchw(dataType);
       }
       break;
-    case 'resnet50_onnx':
-      if (layout == 'nchw' && dataType == 'float32') {
-        return new ResNet50Onnx();
-      }
-      break;
     case 'resnet50v1':
       if (layout == 'nchw' && dataType == 'float16') {
         return new ResNet50V1FP16Nchw();
+      }
+      if (layout == 'nchw' && dataType == 'float32') {
+        return new ResNet50V1Fp32Nchw();
       }
       break;
     case 'resnet50v2':
