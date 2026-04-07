@@ -107,9 +107,7 @@ $('#deviceTypeBtns .btn').on('change', async (e) => {
   ui.handleBtnUI('#float16Label', false);
   // Allow both float32 and float16 for all backends.
   ui.handleBtnUI('#float32Label', false);
-  if (deviceType != 'npu') {
-    $('#float32').click();
-  }
+  $('#float32').click();
 
   utils.displayAvailableModels(modelList, modelIds, layout, dataType, deviceType);
   // Uncheck selected model
